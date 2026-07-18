@@ -45,7 +45,7 @@ decoded_binary = base64.b64decode(save)
 header = decoded_binary[:24]
 decoded_binary = decoded_binary[24:]
 
-code = zlib.decompress(decoded_binary).decode('utf-8')
+code = zlib.decompress(decoded_binary, wbits=-15).decode('utf-8')
 
 if argv.gold is not None:
     gold_start_index = code.find("gold\"") + 7
@@ -89,7 +89,9 @@ if argv.souls is not None:
     code = remove(code, souls_start_index, souls_end_index)
     code = insert(str(argv.souls), code, souls_start_index)
 
-compressed_code = zlib.compress(code.encode('utf-8'), 9)
+compressor = zlib.compressobj(wbits=-15)
+compressed_code = compressor.compress(code.encode('utf-8')) + compressor.flush()
+
 final = header + compressed_code
 
 if argv.output is not None:
